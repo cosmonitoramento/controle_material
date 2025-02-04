@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Materiais</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+    body {
+        background: linear-gradient(45deg, #2E8B57, #4B0082, #FF00FF);
+        background-size: 400% 400%;
+        animation: gradient 10s ease infinite;
+        color: #fff;
+    }
+
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .entrada { 
+        color: #22c55e; 
+        font-weight: bold; 
+    }
+    
+    .saida { 
+        color: #ef4444; 
+        font-weight: bold; 
+    }
+    
+    .historico-item {
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: linear-gradient(145deg, #ffffff, #f3f4f6);
+        transition: all 0.3s ease;
+    }
+
+    .historico-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .material-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        transition: all 0.3s ease;
+    }
+
+    .material-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .tab-pane {
+        padding: 20px 0;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(45deg, #3b82f6, #2563eb);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .card-header.bg-success {
+        background: linear-gradient(45deg, #22c55e, #16a34a);
+    }
+
+    .card-header.bg-info {
+        background: linear-gradient(45deg, #0ea5e9, #0284c7);
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .table {
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .table-striped > tbody > tr:nth-of-type(odd) {
+        background: rgba(249, 250, 251, 0.8);
+    }
+</style>
+</head>
+<body class="bg-light">
+    <div class="container my-4">
+        <!-- Abas -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cadastro" type="button">
+                    Cadastro
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#movimentacao" type="button">
+                    Movimentação
+                </button>
+            </li>
+        </ul>
+
+        <!-- Botão Exportar -->
+        <div class="mb-3">
+            <button onclick="exportarHistorico()" class="btn btn-success">
+                Exportar Histórico
+            </button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Aba de Cadastro -->
+            <div class="tab-pane fade show active" id="cadastro">
+                <div class="row">
+                    <!-- Formulário de Cadastro -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Cadastro de Material</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="formCadastro" onsubmit="cadastrarMaterial(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label">Código</label>
+                                        <input type="text" id="codigo" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descrição</label>
+                                        <input type="text" id="descricao" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantidade</label>
+                                        <input type="number" id="quantidade" class="form-control" min="0" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista de Materiais -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Materiais Cadastrados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="listaMateriais"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba de Movimentação -->
+            <div class="tab-pane fade" id="movimentacao">
+                <div class="row">
+                    <!-- Formulário de Movimentação -->
+                    <div class="col-md-8">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Movimentação de Material</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="formMovimentacao" onsubmit="registrarMovimentacao(event)">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Material</label>
+                                            <select id="materialSelect" class="form-select" required>
+                                                <option value="">Selecione um material</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Tipo de Movimentação</label>
+                                            <select id="tipoMovimentacao" class="form-select" required>
+                                                <option value="entrada">Entrada</option>
+                                                <option value="saida">Saída</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" id="quantidadeMov" class="form-control" min="1" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Responsável</label>
+                                            <input type="text" id="responsavel" class="form-control" required>
+                                            
+                                            <label class="form-label mt-2">Movimento</label>
+                                            <select id="Movimento" class="form-select" required>
+                                                <option value="Devolução">Devolução</option>
+                                                <option value="Descarte">Descarte</option>
+                                                <option value="Manutenção">Manutenção</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary">Registrar Movimentação</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Histórico -->
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">Histórico de Movimentações</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="text" id="pesquisaHistorico" class="form-control" 
+                                           placeholder="Pesquisar por material ou responsável">
+                                    <button class="btn btn-secondary mt-2" onclick="pesquisarHistorico()">
+                                        Pesquisar
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <button class="btn btn-danger" onclick="excluirUltimaLinha()">
+                                        Excluir Última Linha
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Hora</th>
+                                                <th>Material</th>
+                                                <th>Tipo</th>
+                                                <th>Quantidade</th>
+                                                <th>Responsável</th>
+                                                <th>Movimento</th>
+                                                <th>Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historicoMovimentacoes"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Painel de Estoque -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Estoque Atual</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="estoqueAtual"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL da Web App do Google Apps Script
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyDWUBGng0CBhH9meJcKGmTkr2De7GjqGeYpl6UyXhF5pw6XqQEVSEa2aEcj3ihW8qflA/exec';
+
+        // Função para fazer chamadas à API
+        async function callAPI(method, action, data = null) {
+            try {
+                const url = new URL(API_URL);
+                
+                if (method === 'GET') {
+                    if (data) {
+                        Object.keys(data).forEach(key => 
+                            url.searchParams.append(key, data[key]));
+                    }
+                    const response = await fetch(url);
+                    return await response.json();
+                } else {
+                    data = data || {};
+                    data.action = action;
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(data)
+                    });
+                    return await response.json();
+                }
+            } catch (error) {
+                console.error('Erro na API:', error);
+                throw error;
+            }
+        }
+
+        // Função para carregar dados
+        async function carregarDados() {
+            try {
+                const response = await callAPI('GET', null);
+                console.log('Dados carregados:', response);
+                
+                atualizarListaMateriais(response.materiais);
+                atualizarSelectMateriais(response.materiais);
+                atualizarHistorico(response.movimentacoes);
+                atualizarEstoque(response.materiais);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados. Verifique o console para mais detalhes.');
+            }
+        }
+
+        // Função para cadastrar material
+        async function cadastrarMaterial(event) {
+            event.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value.trim();
+            const descricao = document.getElementById('descricao').value.trim();
+            const quantidade = document.getElementById('quantidade').value;
+
+            if (!codigo || !descricao) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            try {
+                console.log('Cadastrando material:', { codigo, descricao, quantidade });
+
+                const response = await callAPI('POST', 'cadastrarMaterial', {
+                    codigo,
+                    descricao,
+                    quantidade
+                });
+
+                if (response.status === 'success') {
+                    alert('Material cadastrado com sucesso!');
+                    document.getElementById('formCadastro').reset();
+                    await carregarDados();
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                alert('Erro ao cadastrar material: ' + error.message);
+            }
+        }
+
+        // Função para registrar movimentação
+        async function registrarMovimentacao(event) {
+            event.preventDefault();
+
+            const codigo = document.getElementById('materialSelect').value;
+            const tipo = document.getElementById('tipoMovimentacao').value;
+            const quantidade = document.getElementById('quantidadeMov').value;
+            const responsavel = document.getElementById('responsavel').value.trim();
+            const movimento = document.getElementById('Movimento').value;
+
+            if (!codigo || !quantidade || !responsavel || !movimento) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            try {
+                console.log('Enviando movimentação:', {
+                    codigo,
+                    tipo,
+                    quantidade,
+                    responsavel,
+                    movimento
+                });
+
+                const response = await callAPI('POST', 'registrarMovimentacao', {
+                    codigo,
+                    tipo,
+                    quantidade,
+                    responsavel,
+                    movimento
+                });
+
+                if (response.status === 'success') {
+                    alert(response.message);
+                    document.getElementById('formMovimentacao').reset();
+                    await carregarDados();
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                console.error('Erro detalhado:', error);
+                alert('Erro ao registrar movimentação: ' + error.message);
+            }
+        }
+
+        // Função para excluir última linha
+        async function excluirUltimaLinha() {
+            const credencial = prompt('Digite sua credencial para confirmar a exclusão:');
+            if (credencial !== '123456') {
+                alert('Credencial incorreta. A exclusão foi cancelada.');
+                return;
+            }
+
+            try {
+                const response = await callAPI('POST', 'excluirUltimaLinha');
+                if (response.status === 'success') {
+                    alert('Última movimentação excluída com sucesso!');
+                    await carregarDados();
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                alert('Erro ao excluir movimentação: ' + error.message);
+            }
+        }
+
+        // Função para exportar histórico
+        async function exportarHistorico() {
+            try {
+                const response = await callAPI('GET', null);
+                const movimentacoes = response.movimentacoes;
+
+                const dadosExportar = movimentacoes.map(mov => ({
+                    'Data/Hora': mov.data,
+                    'Material': mov.descricao,
+                    'Tipo': mov.tipo.toUpperCase(),
+                    'Quantidade': mov.quantidade,
+                    'Responsável': mov.responsavel,
+                    'Movimento': mov.movimento,
+                    'Saldo': mov.saldo
+                }));
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dadosExportar);
+
+                const wscols = [
+                    {wch: 20}, // Data/Hora
+                    {wch: 30}, // Material
+                    {wch: 10}, // Tipo
+                    {wch: 12}, // Quantidade
+                    {wch: 20}, // Responsável
+                    {wch: 15}, // Movimento
+                    {wch: 10}  // Saldo
+                ];
+                ws['!cols'] = wscols;
+
+                XLSX.utils.book_append_sheet(wb, ws, "Histórico de Movimentações");
+                XLSX.writeFile(wb, "historico_movimentacoes.xlsx");
+            } catch (error) {
+                alert('Erro ao exportar histórico: ' + error.message);
+            }
+        }
+
+        // Função para pesquisar no histórico
+        function pesquisarHistorico() {
+            const pesquisa = document.getElementById('pesquisaHistorico').value.toLowerCase();
+            const rows = document.querySelectorAll('#historicoMovimentacoes tr');
+            
+            rows.forEach(row => {
+                const texto = row.textContent.toLowerCase();
+                row.style.display = texto.includes(pesquisa) ? '' : 'none';
+            });
+        }
+
+        // Função para atualizar lista de materiais
+        function atualizarListaMateriais(materiais) {
+            const lista = document.getElementById('listaMateriais');
+            
+            if (!materiais || materiais.length === 0) {
+                lista.innerHTML = '<div class="alert alert-info">Nenhum material cadastrado.</div>';
+                return;
+            }
+
+            lista.innerHTML = materiais.map(material => `
+                <div class="material-item">
+                    <strong>${material.descricao}</strong><br>
+                    Quantidade em estoque: <strong>${material.quantidade}</strong><br>
+                    <small class="text-muted">Código: ${material.codigo}</small>
+                </div>
+            `).join('');
+        }
+
+        // Função para atualizar select de materiais
+        function atualizarSelectMateriais(materiais) {
+            const select = document.getElementById('materialSelect');
+            if (!select) return;
+
+            console.log('Atualizando select com materiais:', materiais);
+
+            select.innerHTML = '<option value="">Selecione um material</option>' + 
+                materiais.map(material => `
+                    <option value="${material.codigo}">
+                        ${material.descricao} (Estoque: ${material.quantidade})
+                    </option>
+                `).join('');
+        }
+
+        // Função para atualizar histórico
+        function atualizarHistorico(movimentacoes) {
+            const tbody = document.getElementById('historicoMovimentacoes');
+            
+            if (!movimentacoes || movimentacoes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma movimentação registrada.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = movimentacoes.map(mov => `
+                <tr>
+                    <td>${mov.data}</td>
+                    <td>${mov.descricao}</td>
+                    <td class="${mov.tipo}">${mov.tipo.toUpperCase()}</td>
+                    <td>${mov.quantidade}</td>
+                    <td>${mov.responsavel}</td>
+                    <td>${mov.movimento}</td>
+                    <td><strong>${mov.saldo}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        // Função para atualizar estoque
+        function atualizarEstoque(materiais) {
+            const estoque = document.getElementById('estoqueAtual');
+            
+            if (!materiais || materiais.length === 0) {
+                estoque.innerHTML = '<div class="alert alert-info">Nenhum material em estoque.</div>';
+                return;
+            }
+
+            estoque.innerHTML = materiais.map(material => `
+                <div class="historico-item">
+                    <strong>${material.descricao}</strong><br>
+                    Quantidade em estoque: <strong>${material.quantidade}</strong><br>
+                    <small class="text-muted">Código: ${material.codigo}</small>
+                </div>
+            `).join('');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', carregarDados);
+
+        // Atualizar ao trocar de aba
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', carregarDados);
+        });
+    </script>
+</body>
+</html>
