@@ -6,104 +6,155 @@
     <title>Controle de Materiais</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
-    body {
-        background: linear-gradient(45deg, #2E8B57, #4B0082, #FF00FF);
-        background-size: 400% 400%;
-        animation: gradient 10s ease infinite;
-        color: #fff;
-    }
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('https://raw.githubusercontent.com/cosmonitoramento/estoque/refs/heads/main/Estoque.webp') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+        }
 
-    @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+        .entrada { color: #22c55e; font-weight: bold; }
+        .saida { color: #ef4444; font-weight: bold; }
+        
+        .historico-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: linear-gradient(145deg, #ffffff, #f3f4f6);
+            transition: all 0.3s ease;
+        }
 
-    .entrada { 
-        color: #22c55e; 
-        font-weight: bold; 
-    }
-    
-    .saida { 
-        color: #ef4444; 
-        font-weight: bold; 
-    }
-    
-    .historico-item {
-        padding: 10px;
-        margin-bottom: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: linear-gradient(145deg, #ffffff, #f3f4f6);
-        transition: all 0.3s ease;
-    }
+        .historico-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .material-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            transition: all 0.3s ease;
+        }
 
-    .historico-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .material-item {
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        background: linear-gradient(145deg, #ffffff, #f8fafc);
-        transition: all 0.3s ease;
-    }
+        .material-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tab-pane { padding: 20px 0; }
+        
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
 
-    .material-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .tab-pane {
-        padding: 20px 0;
-    }
-    
-    .card {
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        background: rgba(255, 255, 255, 0.9);
-        transition: all 0.3s ease;
-    }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
 
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-    }
+        .card-header {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            color: white;
+        }
 
-    .card-header {
-        background: linear-gradient(45deg, #3b82f6, #2563eb);
-        color: white;
-        transition: all 0.3s ease;
-    }
+        .card-header.bg-success {
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+        }
 
-    .card-header.bg-success {
-        background: linear-gradient(45deg, #22c55e, #16a34a);
-    }
+        .card-header.bg-info {
+            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+        }
 
-    .card-header.bg-info {
-        background: linear-gradient(45deg, #0ea5e9, #0284c7);
-    }
+        .btn { transition: all 0.3s ease; }
+        .btn:hover { transform: translateY(-1px); }
 
-    .btn {
-        transition: all 0.3s ease;
-    }
+        .table { background: rgba(255, 255, 255, 0.98); }
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background: rgba(249, 250, 251, 0.95);
+        }
 
-    .btn:hover {
-        transform: translateY(-1px);
-    }
+        .btn-outline-primary {
+            color: #3b82f6;
+            border-color: #3b82f6;
+            background-color: white;
+        }
 
-    .table {
-        background: rgba(255, 255, 255, 0.95);
-    }
+        .btn-outline-primary:hover {
+            color: white;
+            background-color: #3b82f6;
+        }
 
-    .table-striped > tbody > tr:nth-of-type(odd) {
-        background: rgba(249, 250, 251, 0.8);
-    }
-</style>
+        .btn-outline-primary.active {
+            color: white;
+            background-color: #3b82f6;
+        }
+
+        .input-group {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .input-group .form-control:focus {
+            box-shadow: none;
+            border-color: #3b82f6;
+        }
+
+        .btn-group {
+            width: 100%;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Estilos para o Dashboard */
+        .dashboard-card {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Estilos para os gráficos */
+        #graficoMovimentacoes, #graficoArmarios {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="container my-4">
@@ -117,6 +168,11 @@
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#movimentacao" type="button">
                     Movimentação
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">
+                    Dashboard
                 </button>
             </li>
         </ul>
@@ -152,18 +208,39 @@
                                         <label class="form-label">Quantidade</label>
                                         <input type="number" id="quantidade" class="form-control" min="0" required>
                                     </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Armário</label>
+                                        <input type="text" id="armario" class="form-control" required>
+                                    </div>
                                     <button type="submit" class="btn btn-primary">Cadastrar</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <!-- Lista de Materiais -->
+                    <!-- Lista de Materiais com Pesquisa -->
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header bg-success text-white">
                                 <h5 class="mb-0">Materiais Cadastrados</h5>
                             </div>
                             <div class="card-body">
+                                <!-- Campo de Pesquisa -->
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" id="pesquisaMaterial" class="form-control" 
+                                               placeholder="Pesquisar por descrição ou armário">
+                                        <button class="btn btn-secondary" onclick="pesquisarMaterial()">
+                                            Pesquisar
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary active" onclick="filtrarPorTipo('todos')">Todos</button>
+                                            <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('material')">Material</button>
+                                            <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('armario')">Armário</button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div id="listaMateriais"></div>
                             </div>
                         </div>
@@ -218,7 +295,6 @@
                                 </form>
                             </div>
                         </div>
-
                         <!-- Histórico -->
                         <div class="card">
                             <div class="card-header bg-info text-white">
@@ -270,13 +346,79 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Aba do Dashboard -->
+            <div class="tab-pane fade" id="dashboard">
+                <div class="row">
+                    <!-- Gráfico de Movimentações por Mês -->
+                    <div class="col-md-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Movimentações por Mês</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="graficoMovimentacoes" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Resumo de Movimentações -->
+                    <div class="col-md-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Resumo do Mês Atual</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number text-success" id="totalEntradas">0</div>
+                                            <div class="stat-label">Entradas</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-number text-danger" id="totalSaidas">0</div>
+                                            <div class="stat-label">Saídas</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Top 5 Materiais Mais Movimentados -->
+                        <div class="card dashboard-card mt-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">Top 5 Materiais Mais Movimentados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="topMateriais"></div>
+                            </div>
+                        </div>
+                        <!-- Gráfico de Pizza - Distribuição por Armário -->
+                        <div class="card dashboard-card mt-4">
+                            <div class="card-header bg-warning text-white">
+                                <h5 class="mb-0">Distribuição por Armário</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="graficoArmarios" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         // URL da Web App do Google Apps Script
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyDWUBGng0CBhH9meJcKGmTkr2De7GjqGeYpl6UyXhF5pw6XqQEVSEa2aEcj3ihW8qflA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyilwx1Uo41sRCJPVYHrBmiVZ6i0G1swBC2vRUjRrtBkBh28toUFc3eoOeMdvkTViuRHQ/exec';
+
+        // Variáveis globais para pesquisa e gráficos
+        let tipoFiltragem = 'todos';
+        let materiaisCache = [];
+        let graficoMovimentacoes = null;
+        let graficoArmarios = null;
 
         // Função para fazer chamadas à API
         async function callAPI(method, action, data = null) {
@@ -332,19 +474,21 @@
             const codigo = document.getElementById('codigo').value.trim();
             const descricao = document.getElementById('descricao').value.trim();
             const quantidade = document.getElementById('quantidade').value;
+            const armario = document.getElementById('armario').value.trim();
 
-            if (!codigo || !descricao) {
+            if (!codigo || !descricao || !armario) {
                 alert('Preencha todos os campos obrigatórios!');
                 return;
             }
 
             try {
-                console.log('Cadastrando material:', { codigo, descricao, quantidade });
+                console.log('Cadastrando material:', { codigo, descricao, quantidade, armario });
 
                 const response = await callAPI('POST', 'cadastrarMaterial', {
                     codigo,
                     descricao,
-                    quantidade
+                    quantidade,
+                    armario
                 });
 
                 if (response.status === 'success') {
@@ -395,6 +539,7 @@
                     alert(response.message);
                     document.getElementById('formMovimentacao').reset();
                     await carregarDados();
+                    await atualizarDashboard(); // Atualiza o dashboard após movimentação
                 } else {
                     throw new Error(response.message);
                 }
@@ -417,6 +562,7 @@
                 if (response.status === 'success') {
                     alert('Última movimentação excluída com sucesso!');
                     await carregarDados();
+                    await atualizarDashboard(); // Atualiza o dashboard após exclusão
                 } else {
                     throw new Error(response.message);
                 }
@@ -438,7 +584,8 @@
                     'Quantidade': mov.quantidade,
                     'Responsável': mov.responsavel,
                     'Movimento': mov.movimento,
-                    'Saldo': mov.saldo
+                    'Saldo': mov.saldo,
+                    'Armário': mov.armario || 'Não especificado'
                 }));
 
                 const wb = XLSX.utils.book_new();
@@ -451,7 +598,8 @@
                     {wch: 12}, // Quantidade
                     {wch: 20}, // Responsável
                     {wch: 15}, // Movimento
-                    {wch: 10}  // Saldo
+                    {wch: 10}, // Saldo
+                    {wch: 15}  // Armário
                 ];
                 ws['!cols'] = wscols;
 
@@ -460,6 +608,44 @@
             } catch (error) {
                 alert('Erro ao exportar histórico: ' + error.message);
             }
+        }
+
+        // Função para pesquisar material
+        function pesquisarMaterial() {
+            const pesquisa = document.getElementById('pesquisaMaterial').value.toLowerCase();
+            const materiaisItems = document.querySelectorAll('.material-item');
+            
+            materiaisItems.forEach(item => {
+                const texto = item.textContent.toLowerCase();
+                const material = materiaisCache.find(m => 
+                    m.codigo === item.getAttribute('data-codigo')
+                );
+                
+                let mostrar = false;
+                
+                switch(tipoFiltragem) {
+                    case 'material':
+                        mostrar = material.descricao.toLowerCase().includes(pesquisa);
+                        break;
+                    case 'armario':
+                        mostrar = material.armario.toLowerCase().includes(pesquisa);
+                        break;
+                    default: // 'todos'
+                        mostrar = texto.includes(pesquisa);
+                        break;
+                }
+                
+                item.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        // Função para filtrar por tipo
+        function filtrarPorTipo(tipo) {
+            tipoFiltragem = tipo;
+            const buttons = document.querySelectorAll('.btn-outline-primary');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            pesquisarMaterial();
         }
 
         // Função para pesquisar no histórico
@@ -476,6 +662,7 @@
         // Função para atualizar lista de materiais
         function atualizarListaMateriais(materiais) {
             const lista = document.getElementById('listaMateriais');
+            materiaisCache = materiais;
             
             if (!materiais || materiais.length === 0) {
                 lista.innerHTML = '<div class="alert alert-info">Nenhum material cadastrado.</div>';
@@ -483,10 +670,11 @@
             }
 
             lista.innerHTML = materiais.map(material => `
-                <div class="material-item">
+                <div class="material-item" data-codigo="${material.codigo}">
                     <strong>${material.descricao}</strong><br>
                     Quantidade em estoque: <strong>${material.quantidade}</strong><br>
-                    <small class="text-muted">Código: ${material.codigo}</small>
+                    <small class="text-muted">Código: ${material.codigo}</small><br>
+                    <small class="text-muted">Armário: ${material.armario || 'Nãoespecificado'}</small>
                 </div>
             `).join('');
         }
@@ -501,7 +689,7 @@
             select.innerHTML = '<option value="">Selecione um material</option>' + 
                 materiais.map(material => `
                     <option value="${material.codigo}">
-                        ${material.descricao} (Estoque: ${material.quantidade})
+                        ${material.descricao} (Estoque: ${material.quantidade}, Armário: ${material.armario})
                     </option>
                 `).join('');
         }
@@ -541,17 +729,208 @@
                 <div class="historico-item">
                     <strong>${material.descricao}</strong><br>
                     Quantidade em estoque: <strong>${material.quantidade}</strong><br>
-                    <small class="text-muted">Código: ${material.codigo}</small>
+                    <small class="text-muted">Código: ${material.codigo}</small><br>
+                    <small class="text-muted">Armário: ${material.armario || 'Não especificado'}</small>
                 </div>
             `).join('');
         }
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', carregarDados);
+        // Funções do Dashboard
+        function processarDadosPorMes(movimentacoes) {
+            const dados = {};
+            
+            movimentacoes.forEach(mov => {
+                const data = new Date(mov.data);
+                const mesAno = `${data.getMonth() + 1}/${data.getFullYear()}`;
+                
+                if (!dados[mesAno]) {
+                    dados[mesAno] = { entradas: 0, saidas: 0 };
+                }
+                
+                if (mov.tipo === 'entrada') {
+                    dados[mesAno].entradas += mov.quantidade;
+                } else {
+                    dados[mesAno].saidas += mov.quantidade;
+                }
+            });
+            
+            return dados;
+        }
 
-        // Atualizar ao trocar de aba
-        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-            tab.addEventListener('shown.bs.tab', carregarDados);
+        function criarGraficoMovimentacoes(dados) {
+            const ctx = document.getElementById('graficoMovimentacoes').getContext('2d');
+            
+            if (graficoMovimentacoes) {
+                graficoMovimentacoes.destroy();
+            }
+            
+            const labels = Object.keys(dados).sort();
+            const dataEntradas = labels.map(mes => dados[mes].entradas);
+            const dataSaidas = labels.map(mes => dados[mes].saidas);
+            
+            graficoMovimentacoes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Entradas',
+                            data: dataEntradas,
+                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                            borderColor: 'rgb(34, 197, 94)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Saídas',
+                            data: dataSaidas,
+                            backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoArmarios(materiais) {
+            const ctx = document.getElementById('graficoArmarios').getContext('2d');
+            
+            if (graficoArmarios) {
+                graficoArmarios.destroy();
+            }
+
+            const dadosArmarios = materiais.reduce((acc, material) => {
+                const armario = material.armario || 'Não especificado';
+                if (!acc[armario]) {
+                    acc[armario] = 0;
+                }
+                acc[armario] += material.quantidade;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(dadosArmarios);
+            const data = Object.values(dadosArmarios);
+            const cores = labels.map((_, i) => 
+                `hsl(${(i * 360) / labels.length}, 70%, 50%)`
+            );
+
+            graficoArmarios = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: cores,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        async function atualizarDashboard() {
+            try {
+                const response = await callAPI('GET', null);
+                const { movimentacoes, materiais } = response;
+
+                // Gráfico de movimentações
+                const dadosPorMes = processarDadosPorMes(movimentacoes);
+                criarGraficoMovimentacoes(dadosPorMes);
+
+                // Gráfico de armários
+                criarGraficoArmarios(materiais);
+
+                // Atualiza contadores do mês atual
+                const dataAtual = new Date();
+                const mesAtual = dataAtual.getMonth();
+                const anoAtual = dataAtual.getFullYear();
+
+                const movimentacoesMesAtual = movimentacoes.filter(mov => {
+                    const data = new Date(mov.data);
+                    return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+                });
+
+                const totais = movimentacoesMesAtual.reduce((acc, mov) => {
+                    if (mov.tipo === 'entrada') {
+                        acc.entradas += mov.quantidade;
+                    } else {
+                        acc.saidas += mov.quantidade;
+                    }
+                    return acc;
+                }, { entradas: 0, saidas: 0 });
+
+                document.getElementById('totalEntradas').textContent = totais.entradas;
+                document.getElementById('totalSaidas').textContent = totais.saidas;
+
+                // Top materiais
+                const materiaisCount = {};
+                movimentacoes.forEach(mov => {
+                    if (!materiaisCount[mov.descricao]) {
+                        materiaisCount[mov.descricao] = 0;
+                    }
+                    materiaisCount[mov.descricao] += mov.quantidade;
+                });
+
+                const topMateriais = Object.entries(materiaisCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const htmlTopMateriais = topMateriais.map((material, index) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>${index + 1}. ${material[0]}</span>
+                        <span class="badge bg-primary">${material[1]} movimentações</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('topMateriais').innerHTML = htmlTopMateriais;
+
+            } catch (error) {
+                console.error('Erro ao atualizar dashboard:', error);
+            }
+        }
+
+        // Eventos de carregamento e inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+            
+            // Adiciona evento de pesquisa ao pressionar Enter
+            const campoPesquisa = document.getElementById('pesquisaMaterial');
+            if (campoPesquisa) {
+                campoPesquisa.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        pesquisarMaterial();
+                    }
+                });
+            }
+
+            // Atualiza dashboard ao carregar e quando trocar para a aba
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    if (e.target.getAttribute('data-bs-target') === '#dashboard') {
+                        atualizarDashboard();
+                    }
+                });
+            });
         });
     </script>
 </body>
