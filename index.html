@@ -573,42 +573,49 @@
 
         // Função para exportar histórico
         async function exportarHistorico() {
-            try {
-                const response = await callAPI('GET', null);
-                const movimentacoes = response.movimentacoes;
+    try {
+        const response = await callAPI('GET', null);
+        const movimentacoes = response.movimentacoes;
+        const materiais = response.materiais;
 
-                const dadosExportar = movimentacoes.map(mov => ({
-                    'Data/Hora': mov.data,
-                    'Material': mov.descricao,
-                    'Tipo': mov.tipo.toUpperCase(),
-                    'Quantidade': mov.quantidade,
-                    'Responsável': mov.responsavel,
-                    'Movimento': mov.movimento,
-                    'Saldo': mov.saldo,
-                    'Armário': mov.armario || 'Não especificado'
-                }));
+        // Criar um mapa de materiais para fácil acesso ao armário
+        const materiaisMap = {};
+        materiais.forEach(material => {
+            materiaisMap[material.codigo] = material.armario;
+        });
 
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(dadosExportar);
+        const dadosExportar = movimentacoes.map(mov => ({
+            'Data/Hora': mov.data,
+            'Material': mov.descricao,
+            'Tipo': mov.tipo.toUpperCase(),
+            'Quantidade': mov.quantidade,
+            'Responsável': mov.responsavel,
+            'Movimento': mov.movimento,
+            'Saldo': mov.saldo,
+            'Armário': materiaisMap[mov.material] || 'Não especificado'
+        }));
 
-                const wscols = [
-                    {wch: 20}, // Data/Hora
-                    {wch: 30}, // Material
-                    {wch: 10}, // Tipo
-                    {wch: 12}, // Quantidade
-                    {wch: 20}, // Responsável
-                    {wch: 15}, // Movimento
-                    {wch: 10}, // Saldo
-                    {wch: 15}  // Armário
-                ];
-                ws['!cols'] = wscols;
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(dadosExportar);
 
-                XLSX.utils.book_append_sheet(wb, ws, "Histórico de Movimentações");
-                XLSX.writeFile(wb, "historico_movimentacoes.xlsx");
-            } catch (error) {
-                alert('Erro ao exportar histórico: ' + error.message);
-            }
-        }
+        const wscols = [
+            {wch: 20}, // Data/Hora
+            {wch: 30}, // Material
+            {wch: 10}, // Tipo
+            {wch: 12}, // Quantidade
+            {wch: 20}, // Responsável
+            {wch: 15}, // Movimento
+            {wch: 10}, // Saldo
+            {wch: 15}  // Armário
+        ];
+        ws['!cols'] = wscols;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Histórico de Movimentações");
+        XLSX.writeFile(wb, "historico_movimentacoes.xlsx");
+    } catch (error) {
+        alert('Erro ao exportar histórico: ' + error.message);
+    }
+}
 
         // Função para pesquisar material
         function pesquisarMaterial() {
