@@ -3,185 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Materiais</title>
+    <title>Sistema de Controle de Materiais - Versão 2.0</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --info-color: #0284c7;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6)),
                         url('https://raw.githubusercontent.com/cosmonitoramento/imagem_usina/refs/heads/main/djiusina.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
             min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .entrada { color: #22c55e; font-weight: bold; }
-        .saida { color: #ef4444; font-weight: bold; }
-        
-        .historico-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: linear-gradient(145deg, #ffffff, #f3f4f6);
+        /* Header Profissional */
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-section h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-section .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Navegação Aprimorada */
+        .nav-tabs {
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
             transition: all 0.3s ease;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .historico-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .material-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            background: linear-gradient(145deg, #ffffff, #f8fafc);
-            transition: all 0.3s ease;
+        .nav-tabs .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
-        .material-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .nav-tabs .nav-link:hover::before {
+            left: 100%;
         }
-        
-        .tab-pane { padding: 20px 0; }
-        
+
+        .nav-tabs .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        /* Cards Profissionais */
         .card {
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
             background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card-header {
-            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+            transform: skewX(-20deg);
         }
 
         .card-header.bg-success {
-            background: linear-gradient(45deg, #22c55e, #16a34a);
+            background: linear-gradient(135deg, var(--success-color), #047857);
         }
 
         .card-header.bg-info {
-            background: linear-gradient(45deg, #0ea5e9, #0284c7);
+            background: linear-gradient(135deg, var(--info-color), #0369a1);
         }
 
-        .btn { transition: all 0.3s ease; }
-        .btn:hover { transform: translateY(-1px); }
+        .card-header.bg-warning {
+            background: linear-gradient(135deg, var(--warning-color), #b45309);
+        }
 
-        .table { background: rgba(255, 255, 255, 0.98); }
+        .card-header.bg-danger {
+            background: linear-gradient(135deg, var(--danger-color), #b91c1c);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Estilos de Status */
+        .entrada { 
+            color: var(--success-color); 
+            font-weight: 700; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .saida { 
+            color: var(--danger-color); 
+            font-weight: 700; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Items Aprimorados */
+        .historico-item, .material-item {
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .historico-item::before, .material-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--info-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .historico-item:hover, .material-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .historico-item:hover::before, .material-item:hover::before {
+            opacity: 1;
+        }
+
+        /* Formulários Profissionais */
+        .form-control, .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Botões Profissionais */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #047857);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #b91c1c);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #b45309);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-color: var(--primary-color);
+        }
+
+        /* Tabelas Profissionais */
+        .table {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--dark-color), #374151);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
         .table-striped > tbody > tr:nth-of-type(odd) {
             background: rgba(249, 250, 251, 0.95);
         }
 
-        .btn-outline-primary {
-            color: #3b82f6;
-            border-color: #3b82f6;
-            background-color: white;
+        .table tbody tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
         }
 
-        .btn-outline-primary:hover {
-            color: white;
-            background-color: #3b82f6;
-        }
-
-        .btn-outline-primary.active {
-            color: white;
-            background-color: #3b82f6;
-        }
-
-        .input-group {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .input-group .form-control:focus {
-            box-shadow: none;
-            border-color: #3b82f6;
-        }
-
-        .btn-group {
-            width: 100%;
-        }
-
-        .btn-group .btn {
-            flex: 1;
-        }
-
-        /* Estilos para o Dashboard */
+        /* Dashboard Profissional */
         .dashboard-card {
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl);
         }
 
         .stat-card {
-            padding: 20px;
-            border-radius: 8px;
+            padding: 2rem;
+            border-radius: 16px;
             text-align: center;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success-color), var(--danger-color));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
         .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
             line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stat-label {
-            color: #666;
-            font-size: 0.9em;
+            color: #6b7280;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        /* Estilos para os gráficos */
+        /* Badges Profissionais */
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+
+        /* Input Groups */
+        .input-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border-radius: 0;
+            border-right: none;
+        }
+
+        .input-group .form-control:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .input-group .btn {
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Filtros */
+        .btn-group {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 0.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-group .btn {
+            border-radius: 6px;
+            margin: 0 0.125rem;
+        }
+
+        /* Gráficos */
         #graficoMovimentacoes, #graficoArmarios {
             background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animações */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Messages */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        /* Top Materials Styling */
+        .top-material-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
             border-radius: 8px;
-            padding: 10px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .top-material-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .material-rank {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
+    <!-- Header Profissional -->
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-boxes me-3"></i>Sistema de Controle de Materiais</h1>
+                    <div class="subtitle">Gestão Inteligente de Estoque e Movimentações</div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="dataHoraAtual"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container my-4">
-        <!-- Abas -->
-        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <!-- Navegação Aprimorada -->
+        <ul class="nav nav-tabs mb-4 fade-in-up" id="myTab" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cadastro" type="button">
-                    Cadastro
+                    <i class="fas fa-plus-circle me-2"></i>Cadastro
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#movimentacao" type="button">
-                    Movimentação
+                    <i class="fas fa-exchange-alt me-2"></i>Movimentação
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">
-                    Dashboard
+                    <i class="fas fa-chart-line me-2"></i>Dashboard
                 </button>
             </li>
         </ul>
 
-        <!-- Botão Exportar -->
-        <div class="mb-3">
-            <button onclick="exportarHistorico()" class="btn btn-success">
-                Exportar Histórico
-            </button>
+        <!-- Botões de Ação Rápida -->
+        <div class="mb-4 fade-in-up">
+            <div class="d-flex gap-2 flex-wrap">
+                <button onclick="exportarHistorico()" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i>Exportar Histórico
+                </button>
+                <button onclick="carregarDados()" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt me-2"></i>Atualizar Dados
+                </button>
+                <button onclick="limparFormularios()" class="btn btn-warning">
+                    <i class="fas fa-broom me-2"></i>Limpar Formulários
+                </button>
+            </div>
         </div>
 
         <div class="tab-content">
@@ -190,58 +625,65 @@
                 <div class="row">
                     <!-- Formulário de Cadastro -->
                     <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Cadastro de Material</h5>
+                        <div class="card fade-in-up">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-box me-2"></i>Cadastro de Material</h5>
                             </div>
                             <div class="card-body">
                                 <form id="formCadastro" onsubmit="cadastrarMaterial(event)">
                                     <div class="mb-3">
-                                        <label class="form-label">Código</label>
-                                        <input type="text" id="codigo" class="form-control" required>
+                                        <label class="form-label"><i class="fas fa-barcode me-2"></i>Código</label>
+                                        <input type="text" id="codigo" class="form-control" required placeholder="Ex: MT001">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Descrição</label>
-                                        <input type="text" id="descricao" class="form-control" required>
+                                        <label class="form-label"><i class="fas fa-tag me-2"></i>Descrição</label>
+                                        <input type="text" id="descricao" class="form-control" required placeholder="Descrição do material">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Quantidade</label>
-                                        <input type="number" id="quantidade" class="form-control" min="0" required>
+                                        <label class="form-label"><i class="fas fa-sort-numeric-up me-2"></i>Quantidade</label>
+                                        <input type="number" id="quantidade" class="form-control" min="0" required placeholder="0">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Estoque</label>
-                                        <input type="text" id="armario" class="form-control" required>
+                                        <label class="form-label"><i class="fas fa-archive me-2"></i>Estoque/Armário</label>
+                                        <input type="text" id="armario" class="form-control" required placeholder="Ex: Armário A1">
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Cadastrar Material
+                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <!-- Lista de Materiais com Pesquisa -->
+                    
+                    <!-- Lista de Materiais -->
                     <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">Materiais Cadastrados</h5>
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-success">
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Materiais Cadastrados</h5>
                             </div>
                             <div class="card-body">
-                                <!-- Campo de Pesquisa -->
+                                <!-- Controles de Pesquisa -->
                                 <div class="mb-3">
-                                    <div class="input-group">
+                                    <div class="input-group mb-3">
                                         <input type="text" id="pesquisaMaterial" class="form-control" 
-                                               placeholder="Pesquisar por descrição ou armário">
+                                               placeholder="Pesquisar materiais...">
                                         <button class="btn btn-secondary" onclick="pesquisarMaterial()">
-                                            Pesquisar
+                                            <i class="fas fa-search"></i>
                                         </button>
                                     </div>
-                                    <div class="mt-2">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-outline-primary active" onclick="filtrarPorTipo('todos')">Todos</button>
-                                            <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('material')">Material</button>
-                                            <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('armario')">Armário</button>
-                                        </div>
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-primary active" onclick="filtrarPorTipo('todos')">
+                                            <i class="fas fa-globe me-1"></i>Todos
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('material')">
+                                            <i class="fas fa-box me-1"></i>Material
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="filtrarPorTipo('armario')">
+                                            <i class="fas fa-archive me-1"></i>Armário
+                                        </button>
                                     </div>
                                 </div>
-                                <div id="listaMateriais"></div>
+                                <div id="listaMateriais" style="max-height: 400px; overflow-y: auto;"></div>
                             </div>
                         </div>
                     </div>
@@ -253,77 +695,86 @@
                 <div class="row">
                     <!-- Formulário de Movimentação -->
                     <div class="col-md-8">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Movimentação de Material</h5>
+                        <div class="card mb-4 fade-in-up">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Registrar Movimentação</h5>
                             </div>
                             <div class="card-body">
                                 <form id="formMovimentacao" onsubmit="registrarMovimentacao(event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Material</label>
+                                            <label class="form-label"><i class="fas fa-box me-2"></i>Material</label>
                                             <select id="materialSelect" class="form-select" required>
                                                 <option value="">Selecione um material</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Tipo de Movimentação</label>
+                                            <label class="form-label"><i class="fas fa-arrow-right me-2"></i>Tipo de Movimentação</label>
                                             <select id="tipoMovimentacao" class="form-select" required>
-                                                <option value="entrada">Entrada</option>
-                                                <option value="saida">Saída</option>
+                                                <option value="entrada">📥 Entrada</option>
+                                                <option value="saida">📤 Saída</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" id="quantidadeMov" class="form-control" min="1" required>
+                                            <label class="form-label"><i class="fas fa-sort-numeric-up me-2"></i>Quantidade</label>
+                                            <input type="number" id="quantidadeMov" class="form-control" min="1" required placeholder="Quantidade">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Responsável</label>
-                                            <input type="text" id="responsavel" class="form-control" required>
-                                            
-                                            <label class="form-label mt-2">Movimento</label>
+                                            <label class="form-label"><i class="fas fa-user me-2"></i>Responsável</label>
+                                            <input type="text" id="responsavel" class="form-control" required placeholder="Nome do responsável">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label"><i class="fas fa-cogs me-2"></i>Finalidade do Movimento</label>
                                             <select id="Movimento" class="form-select" required>
-                                                <option value="Devolução">Devolução</option>
-                                                <option value="Descarte">Descarte</option>
-                                                <option value="Manutenção">Manutenção</option>
+                                                <option value="Devolução">🔄 Devolução</option>
+                                                <option value="Descarte">🗑️ Descarte</option>
+                                                <option value="Manutenção">🔧 Manutenção</option>
+                                                <option value="Para uso">🔨 Para uso</option>
                                             </select>
                                         </div>
                                         <div class="col-12">
-                                            <button type="submit" class="btn btn-primary">Registrar Movimentação</button>
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-check me-2"></i>Registrar Movimentação
+                                            </button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
-                        <!-- Histórico -->
-                        <div class="card">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0">Histórico de Movimentações</h5>
+                        
+                        <!-- Histórico de Movimentações -->
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-info">
+                                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Histórico de Movimentações</h5>
                             </div>
                             <div class="card-body">
-                                <div class="mb-3">
-                                    <input type="text" id="pesquisaHistorico" class="form-control" 
-                                           placeholder="Pesquisar por material ou responsável">
-                                    <button class="btn btn-secondary mt-2" onclick="pesquisarHistorico()">
-                                        Pesquisar
-                                    </button>
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <div class="input-group">
+                                            <input type="text" id="pesquisaHistorico" class="form-control" 
+                                                   placeholder="Pesquisar no histórico...">
+                                            <button class="btn btn-secondary" onclick="pesquisarHistorico()">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-danger w-100" onclick="excluirUltimaLinha()">
+                                            <i class="fas fa-trash me-2"></i>Excluir Última
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-danger" onclick="excluirUltimaLinha()">
-                                        Excluir Última Linha
-                                    </button>
-                                </div>
-                                <div class="table-responsive">
+                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Data/Hora</th>
-                                                <th>Material</th>
-                                                <th>Tipo</th>
-                                                <th>Quantidade</th>
-                                                <th>Responsável</th>
-                                                <th>Movimento</th>
-                                                <th>Saldo</th>
+                                                <th><i class="fas fa-calendar me-2"></i>Data/Hora</th>
+                                                <th><i class="fas fa-box me-2"></i>Material</th>
+                                                <th><i class="fas fa-exchange-alt me-2"></i>Tipo</th>
+                                                <th><i class="fas fa-sort-numeric-up me-2"></i>Quantidade</th>
+                                                <th><i class="fas fa-user me-2"></i>Responsável</th>
+                                                <th><i class="fas fa-cogs me-2"></i>Movimento</th>
+                                                <th><i class="fas fa-calculator me-2"></i>Saldo</th>
                                             </tr>
                                         </thead>
                                         <tbody id="historicoMovimentacoes"></tbody>
@@ -335,12 +786,12 @@
 
                     <!-- Painel de Estoque -->
                     <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">Estoque Atual</h5>
+                        <div class="card fade-in-up">
+                            <div class="card-header bg-success">
+                                <h5 class="mb-0"><i class="fas fa-warehouse me-2"></i>Estoque Atual</h5>
                             </div>
                             <div class="card-body">
-                                <div id="estoqueAtual"></div>
+                                <div id="estoqueAtual" style="max-height: 600px; overflow-y: auto;"></div>
                             </div>
                         </div>
                     </div>
@@ -350,56 +801,93 @@
             <!-- Aba do Dashboard -->
             <div class="tab-pane fade" id="dashboard">
                 <div class="row">
-                    <!-- Gráfico de Movimentações por Mês -->
-                    <div class="col-md-6">
-                        <div class="card dashboard-card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Movimentações por Mês</h5>
+                    <!-- Estatísticas Principais -->
+                    <div class="col-12 mb-4">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card fade-in-up">
+                                    <div class="stat-number text-primary" id="totalMateriais">0</div>
+                                    <div class="stat-label">Total de Materiais</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card fade-in-up">
+                                    <div class="stat-number text-success" id="totalEntradas">0</div>
+                                    <div class="stat-label">Entradas (Mês)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card fade-in-up">
+                                    <div class="stat-number text-danger" id="totalSaidas">0</div>
+                                    <div class="stat-label">Saídas (Mês)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card fade-in-up">
+                                    <div class="stat-number text-info" id="totalMovimentacoes">0</div>
+                                    <div class="stat-label">Total de Movimentações</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Movimentações -->
+                    <div class="col-md-8">
+                        <div class="card dashboard-card fade-in-up">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Movimentações por Mês</h5>
                             </div>
                             <div class="card-body">
                                 <canvas id="graficoMovimentacoes" height="300"></canvas>
                             </div>
                         </div>
                     </div>
-                    <!-- Resumo de Movimentações -->
-                    <div class="col-md-6">
-                        <div class="card dashboard-card">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">Resumo do Mês Atual</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-number text-success" id="totalEntradas">0</div>
-                                            <div class="stat-label">Entradas</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-number text-danger" id="totalSaidas">0</div>
-                                            <div class="stat-label">Saídas</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
+                    <!-- Top Materiais e Gráfico de Pizza -->
+                    <div class="col-md-4">
                         <!-- Top 5 Materiais Mais Movimentados -->
-                        <div class="card dashboard-card mt-4">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0">Top 5 Materiais Mais Movimentados</h5>
+                        <div class="card dashboard-card mb-4 fade-in-up">
+                            <div class="card-header bg-info">
+                                <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top 5 Materiais</h5>
                             </div>
                             <div class="card-body">
                                 <div id="topMateriais"></div>
                             </div>
                         </div>
+
                         <!-- Gráfico de Pizza - Distribuição por Armário -->
-                        <div class="card dashboard-card mt-4">
-                            <div class="card-header bg-warning text-white">
-                                <h5 class="mb-0">Distribuição por Armário</h5>
+                        <div class="card dashboard-card fade-in-up">
+                            <div class="card-header bg-warning">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Distribuição por Armário</h5>
                             </div>
                             <div class="card-body">
                                 <canvas id="graficoArmarios" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análises Adicionais -->
+                    <div class="col-12 mt-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card dashboard-card fade-in-up">
+                                    <div class="card-header bg-success">
+                                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Movimentações por Finalidade</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="graficoFinalidades" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card dashboard-card fade-in-up">
+                                    <div class="card-header bg-danger">
+                                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Materiais com Baixo Estoque</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="materiaisBaixoEstoque"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -408,17 +896,81 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         // URL da Web App do Google Apps Script
         const API_URL = 'https://script.google.com/macros/s/AKfycbyilwx1Uo41sRCJPVYHrBmiVZ6i0G1swBC2vRUjRrtBkBh28toUFc3eoOeMdvkTViuRHQ/exec';
 
-        // Variáveis globais para pesquisa e gráficos
+        // Variáveis globais
         let tipoFiltragem = 'todos';
         let materiaisCache = [];
         let graficoMovimentacoes = null;
         let graficoArmarios = null;
+        let graficoFinalidades = null;
+
+        // Função para atualizar data e hora
+        function atualizarDataHora() {
+            const agora = new Date();
+            const opcoes = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('dataHoraAtual').textContent = 
+                agora.toLocaleDateString('pt-BR', opcoes);
+        }
+
+        // Função para mostrar toast
+        function mostrarToast(mensagem, tipo = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${tipo} border-0`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                        ${mensagem}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove o toast após ser ocultado
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Função para adicionar loading
+        function adicionarLoading(elemento) {
+            elemento.classList.add('loading');
+        }
+
+        // Função para remover loading
+        function removerLoading(elemento) {
+            elemento.classList.remove('loading');
+        }
+
+        // Função para limpar formulários
+        function limparFormularios() {
+            document.getElementById('formCadastro').reset();
+            document.getElementById('formMovimentacao').reset();
+            mostrarToast('Formulários limpos com sucesso!', 'info');
+        }
 
         // Função para fazer chamadas à API
         async function callAPI(method, action, data = null) {
@@ -453,6 +1005,9 @@
 
         // Função para carregar dados
         async function carregarDados() {
+            const btnAtualizar = document.querySelector('button[onclick="carregarDados()"]');
+            if (btnAtualizar) adicionarLoading(btnAtualizar);
+            
             try {
                 const response = await callAPI('GET', null);
                 console.log('Dados carregados:', response);
@@ -461,9 +1016,13 @@
                 atualizarSelectMateriais(response.materiais);
                 atualizarHistorico(response.movimentacoes);
                 atualizarEstoque(response.materiais);
+                
+                mostrarToast('Dados atualizados com sucesso!');
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-                alert('Erro ao carregar dados. Verifique o console para mais detalhes.');
+                mostrarToast('Erro ao carregar dados', 'danger');
+            } finally {
+                if (btnAtualizar) removerLoading(btnAtualizar);
             }
         }
 
@@ -471,19 +1030,22 @@
         async function cadastrarMaterial(event) {
             event.preventDefault();
             
+            const form = event.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            adicionarLoading(submitBtn);
+            
             const codigo = document.getElementById('codigo').value.trim();
             const descricao = document.getElementById('descricao').value.trim();
             const quantidade = document.getElementById('quantidade').value;
             const armario = document.getElementById('armario').value.trim();
 
             if (!codigo || !descricao || !armario) {
-                alert('Preencha todos os campos obrigatórios!');
+                mostrarToast('Preencha todos os campos obrigatórios!', 'warning');
+                removerLoading(submitBtn);
                 return;
             }
 
             try {
-                console.log('Cadastrando material:', { codigo, descricao, quantidade, armario });
-
                 const response = await callAPI('POST', 'cadastrarMaterial', {
                     codigo,
                     descricao,
@@ -492,20 +1054,26 @@
                 });
 
                 if (response.status === 'success') {
-                    alert('Material cadastrado com sucesso!');
-                    document.getElementById('formCadastro').reset();
+                    mostrarToast('Material cadastrado com sucesso!');
+                    form.reset();
                     await carregarDados();
                 } else {
                     throw new Error(response.message);
                 }
             } catch (error) {
-                alert('Erro ao cadastrar material: ' + error.message);
+                mostrarToast('Erro ao cadastrar material: ' + error.message, 'danger');
+            } finally {
+                removerLoading(submitBtn);
             }
         }
 
         // Função para registrar movimentação
         async function registrarMovimentacao(event) {
             event.preventDefault();
+
+            const form = event.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            adicionarLoading(submitBtn);
 
             const codigo = document.getElementById('materialSelect').value;
             const tipo = document.getElementById('tipoMovimentacao').value;
@@ -514,19 +1082,12 @@
             const movimento = document.getElementById('Movimento').value;
 
             if (!codigo || !quantidade || !responsavel || !movimento) {
-                alert('Preencha todos os campos obrigatórios!');
+                mostrarToast('Preencha todos os campos obrigatórios!', 'warning');
+                removerLoading(submitBtn);
                 return;
             }
 
             try {
-                console.log('Enviando movimentação:', {
-                    codigo,
-                    tipo,
-                    quantidade,
-                    responsavel,
-                    movimento
-                });
-
                 const response = await callAPI('POST', 'registrarMovimentacao', {
                     codigo,
                     tipo,
@@ -536,86 +1097,87 @@
                 });
 
                 if (response.status === 'success') {
-                    alert(response.message);
-                    document.getElementById('formMovimentacao').reset();
+                    mostrarToast(response.message);
+                    form.reset();
                     await carregarDados();
-                    await atualizarDashboard(); // Atualiza o dashboard após movimentação
+                    await atualizarDashboard();
                 } else {
                     throw new Error(response.message);
                 }
             } catch (error) {
-                console.error('Erro detalhado:', error);
-                alert('Erro ao registrar movimentação: ' + error.message);
+                mostrarToast('Erro ao registrar movimentação: ' + error.message, 'danger');
+            } finally {
+                removerLoading(submitBtn);
             }
         }
 
         // Função para excluir última linha
         async function excluirUltimaLinha() {
-            const credencial = prompt('Digite sua credencial para confirmar a exclusão:');
+            const credencial = prompt('🔐 Digite sua credencial para confirmar a exclusão:');
             if (credencial !== '123456') {
-                alert('Credencial incorreta. A exclusão foi cancelada.');
+                mostrarToast('Credencial incorreta. Exclusão cancelada.', 'warning');
                 return;
             }
 
             try {
                 const response = await callAPI('POST', 'excluirUltimaLinha');
                 if (response.status === 'success') {
-                    alert('Última movimentação excluída com sucesso!');
+                    mostrarToast('Última movimentação excluída com sucesso!');
                     await carregarDados();
-                    await atualizarDashboard(); // Atualiza o dashboard após exclusão
+                    await atualizarDashboard();
                 } else {
                     throw new Error(response.message);
                 }
             } catch (error) {
-                alert('Erro ao excluir movimentação: ' + error.message);
+                mostrarToast('Erro ao excluir movimentação: ' + error.message, 'danger');
             }
         }
 
         // Função para exportar histórico
         async function exportarHistorico() {
-    try {
-        const response = await callAPI('GET', null);
-        const movimentacoes = response.movimentacoes;
-        const materiais = response.materiais;
+            const btnExportar = document.querySelector('button[onclick="exportarHistorico()"]');
+            adicionarLoading(btnExportar);
+            
+            try {
+                const response = await callAPI('GET', null);
+                const movimentacoes = response.movimentacoes;
+                const materiais = response.materiais;
 
-        // Criar um mapa de materiais para fácil acesso ao armário
-        const materiaisMap = {};
-        materiais.forEach(material => {
-            materiaisMap[material.codigo] = material.armario;
-        });
+                const materiaisMap = {};
+                materiais.forEach(material => {
+                    materiaisMap[material.codigo] = material.armario;
+                });
 
-        const dadosExportar = movimentacoes.map(mov => ({
-            'Data/Hora': mov.data,
-            'Material': mov.descricao,
-            'Tipo': mov.tipo.toUpperCase(),
-            'Quantidade': mov.quantidade,
-            'Responsável': mov.responsavel,
-            'Movimento': mov.movimento,
-            'Saldo': mov.saldo,
-            'Armário': materiaisMap[mov.material] || 'Não especificado'
-        }));
+                const dadosExportar = movimentacoes.map(mov => ({
+                    'Data/Hora': mov.data,
+                    'Material': mov.descricao,
+                    'Tipo': mov.tipo.toUpperCase(),
+                    'Quantidade': mov.quantidade,
+                    'Responsável': mov.responsavel,
+                    'Movimento': mov.movimento,
+                    'Saldo': mov.saldo,
+                    'Armário': materiaisMap[mov.material] || 'Não especificado'
+                }));
 
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(dadosExportar);
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dadosExportar);
 
-        const wscols = [
-            {wch: 20}, // Data/Hora
-            {wch: 30}, // Material
-            {wch: 10}, // Tipo
-            {wch: 12}, // Quantidade
-            {wch: 20}, // Responsável
-            {wch: 15}, // Movimento
-            {wch: 10}, // Saldo
-            {wch: 15}  // Armário
-        ];
-        ws['!cols'] = wscols;
+                const wscols = [
+                    {wch: 20}, {wch: 30}, {wch: 10}, {wch: 12},
+                    {wch: 20}, {wch: 15}, {wch: 10}, {wch: 15}
+                ];
+                ws['!cols'] = wscols;
 
-        XLSX.utils.book_append_sheet(wb, ws, "Histórico de Movimentações");
-        XLSX.writeFile(wb, "historico_movimentacoes.xlsx");
-    } catch (error) {
-        alert('Erro ao exportar histórico: ' + error.message);
-    }
-}
+                XLSX.utils.book_append_sheet(wb, ws, "Histórico de Movimentações");
+                XLSX.writeFile(wb, `historico_movimentacoes_${new Date().toISOString().split('T')[0]}.xlsx`);
+                
+                mostrarToast('Histórico exportado com sucesso!');
+            } catch (error) {
+                mostrarToast('Erro ao exportar histórico: ' + error.message, 'danger');
+            } finally {
+                removerLoading(btnExportar);
+            }
+        }
 
         // Função para pesquisar material
         function pesquisarMaterial() {
@@ -623,7 +1185,6 @@
             const materiaisItems = document.querySelectorAll('.material-item');
             
             materiaisItems.forEach(item => {
-                const texto = item.textContent.toLowerCase();
                 const material = materiaisCache.find(m => 
                     m.codigo === item.getAttribute('data-codigo')
                 );
@@ -637,7 +1198,8 @@
                     case 'armario':
                         mostrar = material.armario.toLowerCase().includes(pesquisa);
                         break;
-                    default: // 'todos'
+                    default:
+                        const texto = item.textContent.toLowerCase();
                         mostrar = texto.includes(pesquisa);
                         break;
                 }
@@ -672,16 +1234,24 @@
             materiaisCache = materiais;
             
             if (!materiais || materiais.length === 0) {
-                lista.innerHTML = '<div class="alert alert-info">Nenhum material cadastrado.</div>';
+                lista.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Nenhum material cadastrado.</div>';
                 return;
             }
 
             lista.innerHTML = materiais.map(material => `
                 <div class="material-item" data-codigo="${material.codigo}">
-                    <strong>${material.descricao}</strong><br>
-                    Quantidade em estoque: <strong>${material.quantidade}</strong><br>
-                    <small class="text-muted">Código: ${material.codigo}</small><br>
-                    <small class="text-muted">Armário: ${material.armario || 'Nãoespecificado'}</small>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-box me-2 text-primary"></i>${material.descricao}</h6>
+                            <small class="text-muted"><i class="fas fa-barcode me-1"></i>Código: ${material.codigo}</small><br>
+                            <small class="text-muted"><i class="fas fa-archive me-1"></i>Armário: ${material.armario || 'Não especificado'}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${material.quantidade > 10 ? 'bg-success' : material.quantidade > 5 ? 'bg-warning' : 'bg-danger'} fs-6">
+                                ${material.quantidade}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
@@ -690,8 +1260,6 @@
         function atualizarSelectMateriais(materiais) {
             const select = document.getElementById('materialSelect');
             if (!select) return;
-
-            console.log('Atualizando select com materiais:', materiais);
 
             select.innerHTML = '<option value="">Selecione um material</option>' + 
                 materiais.map(material => `
@@ -706,19 +1274,22 @@
             const tbody = document.getElementById('historicoMovimentacoes');
             
             if (!movimentacoes || movimentacoes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma movimentação registrada.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-inbox me-2"></i>Nenhuma movimentação registrada.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = movimentacoes.map(mov => `
                 <tr>
-                    <td>${mov.data}</td>
-                    <td>${mov.descricao}</td>
-                    <td class="${mov.tipo}">${mov.tipo.toUpperCase()}</td>
-                    <td>${mov.quantidade}</td>
-                    <td>${mov.responsavel}</td>
-                    <td>${mov.movimento}</td>
-                    <td><strong>${mov.saldo}</strong></td>
+                    <td><i class="fas fa-clock me-2 text-muted"></i>${mov.data}</td>
+                    <td><i class="fas fa-box me-2 text-primary"></i>${mov.descricao}</td>
+                    <td class="${mov.tipo}">
+                        <i class="fas fa-${mov.tipo === 'entrada' ? 'arrow-down' : 'arrow-up'} me-2"></i>
+                        ${mov.tipo.toUpperCase()}
+                    </td>
+                    <td><strong>${mov.quantidade}</strong></td>
+                    <td><i class="fas fa-user me-2 text-muted"></i>${mov.responsavel}</td>
+                    <td><span class="badge bg-secondary">${mov.movimento}</span></td>
+                    <td><strong class="text-primary">${mov.saldo}</strong></td>
                 </tr>
             `).join('');
         }
@@ -728,16 +1299,28 @@
             const estoque = document.getElementById('estoqueAtual');
             
             if (!materiais || materiais.length === 0) {
-                estoque.innerHTML = '<div class="alert alert-info">Nenhum material em estoque.</div>';
+                estoque.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Nenhum material em estoque.</div>';
                 return;
             }
 
-            estoque.innerHTML = materiais.map(material => `
+            // Ordenar por quantidade (menor primeiro para destacar baixo estoque)
+            const materiaisOrdenados = [...materiais].sort((a, b) => a.quantidade - b.quantidade);
+
+            estoque.innerHTML = materiaisOrdenados.map(material => `
                 <div class="historico-item">
-                    <strong>${material.descricao}</strong><br>
-                    Quantidade em estoque: <strong>${material.quantidade}</strong><br>
-                    <small class="text-muted">Código: ${material.codigo}</small><br>
-                    <small class="text-muted">Armário: ${material.armario || 'Não especificado'}</small>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-box me-2 text-primary"></i>${material.descricao}</h6>
+                            <small class="text-muted"><i class="fas fa-barcode me-1"></i>${material.codigo}</small><br>
+                            <small class="text-muted"><i class="fas fa-archive me-1"></i>${material.armario || 'Não especificado'}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${material.quantidade > 10 ? 'bg-success' : material.quantidade > 5 ? 'bg-warning' : 'bg-danger'} fs-5">
+                                ${material.quantidade}
+                            </span>
+                        </div>
+                    </div>
+                    ${material.quantidade <= 5 ? '<div class="mt-2"><small class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Estoque baixo!</small></div>' : ''}
                 </div>
             `).join('');
         }
@@ -748,7 +1331,7 @@
             
             movimentacoes.forEach(mov => {
                 const data = new Date(mov.data);
-                const mesAno = `${data.getMonth() + 1}/${data.getFullYear()}`;
+                const mesAno = `${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
                 
                 if (!dados[mesAno]) {
                     dados[mesAno] = { entradas: 0, saidas: 0 };
@@ -783,16 +1366,18 @@
                         {
                             label: 'Entradas',
                             data: dataEntradas,
-                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
                             borderColor: 'rgb(34, 197, 94)',
-                            borderWidth: 1
+                            borderWidth: 2,
+                            borderRadius: 4
                         },
                         {
                             label: 'Saídas',
                             data: dataSaidas,
-                            backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
                             borderColor: 'rgb(239, 68, 68)',
-                            borderWidth: 1
+                            borderWidth: 2,
+                            borderRadius: 4
                         }
                     ]
                 },
@@ -801,11 +1386,23 @@
                     plugins: {
                         legend: {
                             position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
@@ -830,9 +1427,10 @@
 
             const labels = Object.keys(dadosArmarios);
             const data = Object.values(dadosArmarios);
-            const cores = labels.map((_, i) => 
-                `hsl(${(i * 360) / labels.length}, 70%, 50%)`
-            );
+            const cores = [
+                '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
+                '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6B7280'
+            ];
 
             graficoArmarios = new Chart(ctx, {
                 type: 'doughnut',
@@ -841,14 +1439,70 @@
                     datasets: [{
                         data: data,
                         backgroundColor: cores,
-                        borderWidth: 1
+                        borderWidth: 3,
+                        borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'right'
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoFinalidades(movimentacoes) {
+            const ctx = document.getElementById('graficoFinalidades');
+            if (!ctx) return;
+            
+            if (graficoFinalidades) {
+                graficoFinalidades.destroy();
+            }
+
+            const dadosFinalidades = movimentacoes.reduce((acc, mov) => {
+                const finalidade = mov.movimento || 'Não especificado';
+                if (!acc[finalidade]) {
+                    acc[finalidade] = 0;
+                }
+                acc[finalidade] += mov.quantidade;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(dadosFinalidades);
+            const data = Object.values(dadosFinalidades);
+            const cores = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6'];
+
+            graficoFinalidades = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: data,
+                        backgroundColor: cores,
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
                         }
                     }
                 }
@@ -860,14 +1514,17 @@
                 const response = await callAPI('GET', null);
                 const { movimentacoes, materiais } = response;
 
-                // Gráfico de movimentações
+                // Atualizar estatísticas principais
+                document.getElementById('totalMateriais').textContent = materiais.length;
+                document.getElementById('totalMovimentacoes').textContent = movimentacoes.length;
+
+                // Gráficos
                 const dadosPorMes = processarDadosPorMes(movimentacoes);
                 criarGraficoMovimentacoes(dadosPorMes);
-
-                // Gráfico de armários
                 criarGraficoArmarios(materiais);
+                criarGraficoFinalidades(movimentacoes);
 
-                // Atualiza contadores do mês atual
+                // Contadores do mês atual
                 const dataAtual = new Date();
                 const mesAtual = dataAtual.getMonth();
                 const anoAtual = dataAtual.getFullYear();
@@ -889,7 +1546,7 @@
                 document.getElementById('totalEntradas').textContent = totais.entradas;
                 document.getElementById('totalSaidas').textContent = totais.saidas;
 
-                // Top materiais
+                // Top materiais mais movimentados
                 const materiaisCount = {};
                 movimentacoes.forEach(mov => {
                     if (!materiaisCount[mov.descricao]) {
@@ -902,43 +1559,279 @@
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5);
 
-                const htmlTopMateriais = topMateriais.map((material, index) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>${index + 1}. ${material[0]}</span>
-                        <span class="badge bg-primary">${material[1]} movimentações</span>
+                const htmlTopMateriais = topMateriais.length > 0 ? topMateriais.map((material, index) => `
+                    <div class="top-material-item">
+                        <div class="d-flex align-items-center">
+                            <div class="material-rank me-3">${index + 1}</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${material[0]}</div>
+                                <small class="text-muted">Total movimentado</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary fs-6">${material[1]}</span>
+                            </div>
+                        </div>
                     </div>
-                `).join('');
+                `).join('') : '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Nenhuma movimentação encontrada.</div>';
 
                 document.getElementById('topMateriais').innerHTML = htmlTopMateriais;
 
+                // Materiais com baixo estoque (menos de 5 unidades)
+                const materiaisBaixoEstoque = materiais.filter(material => material.quantidade <= 5);
+                
+                const htmlBaixoEstoque = materiaisBaixoEstoque.length > 0 ? materiaisBaixoEstoque.map(material => `
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><i class="fas fa-exclamation-triangle me-2"></i>${material.descricao}</strong><br>
+                            <small>Armário: ${material.armario || 'Não especificado'}</small>
+                        </div>
+                        <span class="badge bg-danger fs-6">${material.quantidade}</span>
+                    </div>
+                `).join('') : '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Todos os materiais estão com estoque adequado!</div>';
+
+                document.getElementById('materiaisBaixoEstoque').innerHTML = htmlBaixoEstoque;
+
             } catch (error) {
                 console.error('Erro ao atualizar dashboard:', error);
+                mostrarToast('Erro ao atualizar dashboard', 'danger');
             }
         }
 
         // Eventos de carregamento e inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            // Atualizar data/hora inicial e a cada minuto
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 60000);
+            
+            // Carregar dados iniciais
             carregarDados();
             
-            // Adiciona evento de pesquisa ao pressionar Enter
-            const campoPesquisa = document.getElementById('pesquisaMaterial');
-            if (campoPesquisa) {
-                campoPesquisa.addEventListener('keypress', function(e) {
+            // Adicionar animação fade-in-up aos elementos
+            const elements = document.querySelectorAll('.fade-in-up');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            // Eventos de pesquisa
+            const campoPesquisaMaterial = document.getElementById('pesquisaMaterial');
+            if (campoPesquisaMaterial) {
+                campoPesquisaMaterial.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         pesquisarMaterial();
                     }
                 });
+                
+                // Pesquisa em tempo real
+                campoPesquisaMaterial.addEventListener('input', function() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(pesquisarMaterial, 300);
+                });
             }
 
-            // Atualiza dashboard ao carregar e quando trocar para a aba
+            const campoPesquisaHistorico = document.getElementById('pesquisaHistorico');
+            if (campoPesquisaHistorico) {
+                campoPesquisaHistorico.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        pesquisarHistorico();
+                    }
+                });
+                
+                // Pesquisa em tempo real
+                campoPesquisaHistorico.addEventListener('input', function() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(pesquisarHistorico, 300);
+                });
+            }
+
+            // Atualizar dashboard ao trocar para a aba
             document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
                 tab.addEventListener('shown.bs.tab', function(e) {
                     if (e.target.getAttribute('data-bs-target') === '#dashboard') {
-                        atualizarDashboard();
+                        setTimeout(atualizarDashboard, 100);
                     }
                 });
             });
+
+            // Adicionar validação em tempo real aos formulários
+            const formCadastro = document.getElementById('formCadastro');
+            if (formCadastro) {
+                formCadastro.addEventListener('input', function(e) {
+                    const input = e.target;
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                });
+            }
+
+            const formMovimentacao = document.getElementById('formMovimentacao');
+            if (formMovimentacao) {
+                formMovimentacao.addEventListener('input', function(e) {
+                    const input = e.target;
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                });
+            }
+
+            // Adicionar atalhos de teclado
+            document.addEventListener('keydown', function(e) {
+                // Ctrl + 1, 2, 3 para trocar de aba
+                if (e.ctrlKey) {
+                    switch(e.key) {
+                        case '1':
+                            e.preventDefault();
+                            document.querySelector('[data-bs-target="#cadastro"]').click();
+                            break;
+                        case '2':
+                            e.preventDefault();
+                            document.querySelector('[data-bs-target="#movimentacao"]').click();
+                            break;
+                        case '3':
+                            e.preventDefault();
+                            document.querySelector('[data-bs-target="#dashboard"]').click();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            exportarHistorico();
+                            break;
+                        case 'r':
+                            e.preventDefault();
+                            carregarDados();
+                            break;
+                    }
+                }
+            });
+
+            // Mostrar dicas de atalhos
+            mostrarToast('💡 Dicas: Ctrl+1/2/3 para trocar abas, Ctrl+S para exportar, Ctrl+R para atualizar', 'info');
         });
+
+        // Adicionar estilos CSS para validação
+        const style = document.createElement('style');
+        style.textContent = `
+            .form-control.is-valid,
+            .form-select.is-valid {
+                border-color: var(--success-color);
+                box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+            }
+            
+            .form-control.is-invalid,
+            .form-select.is-invalid {
+                border-color: var(--danger-color);
+                box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            }
+            
+            .fade-in-up {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: all 0.6s ease-out;
+            }
+            
+            /* Melhorias adicionais de responsividade */
+            @media (max-width: 576px) {
+                .btn-group .btn {
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.8rem;
+                }
+                
+                .stat-card {
+                    padding: 1.5rem;
+                }
+                
+                .material-item,
+                .historico-item {
+                    padding: 1rem;
+                }
+                
+                .header-section {
+                    padding: 1rem 0;
+                }
+                
+                .header-section h1 {
+                    font-size: 1.25rem;
+                }
+                
+                .nav-tabs .nav-link {
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.8rem;
+                }
+                
+                .table-responsive {
+                    font-size: 0.85rem;
+                }
+            }
+            
+            /* Efeitos hover adicionais */
+            .btn:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .card:active {
+                transform: translateY(-4px);
+            }
+            
+            /* Animação para loading */
+            .loading .btn::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                margin: auto;
+                border: 2px solid transparent;
+                border-top-color: #ffffff;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            /* Melhorias na acessibilidade */
+            .btn:focus,
+            .form-control:focus,
+            .form-select:focus {
+                outline: 2px solid var(--primary-color);
+                outline-offset: 2px;
+            }
+            
+            /* Dark mode suporte */
+            @media (prefers-color-scheme: dark) {
+                .table {
+                    background: rgba(31, 41, 55, 0.98);
+                    color: #f9fafb;
+                }
+                
+                .table thead th {
+                    background: linear-gradient(135deg, #1f2937, #111827);
+                }
+                
+                .table tbody td {
+                    border-bottom-color: #374151;
+                }
+                
+                .form-control,
+                .form-select {
+                    background: rgba(31, 41, 55, 0.8);
+                    border-color: #4b5563;
+                    color: #f9fafb;
+                }
+                
+                .form-control:focus,
+                .form-select:focus {
+                    background: rgba(31, 41, 55, 0.9);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
